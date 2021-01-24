@@ -1,0 +1,83 @@
+<form method="POST" id="post-form">
+    {% csrf_token %}
+    <input type="text" id="text">
+    <input type="submit" value="submit">
+</form>
+<div class="posts">
+<!--{% for dbb, db in dbba_and_dbba2 %}
+<h4>{{dbb.body}}</h4>
+<hr>
+<h4 style="text-align: right;">{{db.body}}</h4>
+<hr>
+{% endfor %}-->
+{% for dbb in dbba %}
+    {% if dbb.person_head == personp %}
+        <h4>{{dbb.body}}</h4>
+        <hr>
+    {% else %}
+        <h4 style="text-align: right;">{{dbb.body}}</h4>
+        <hr>
+    {% endif %}
+{% endfor %}
+</div>
+<div class="posts2">
+    <!--
+{% for dbb in dbba2 %}
+<h4>{{dbb.body}}</h4>
+<hr>
+{% endfor %}-->
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).on('submit', '#post-form',function(e){
+    e.preventDefault();
+    $.ajax({
+        type:'POST',
+        url:'{% url "create" personp personp2 %}',
+        data:{
+            body:$('#text').val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success:function(json){
+            document.getElementById("post-form").reset();
+            $(".posts").prepend(
+                        '<h4>' + json.body + '</h4>' + 
+                        '<hr>'
+            )
+        },
+        error : function(xhr,errmsg,err) {
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    }
+    });
+});
+
+window.onload = setInterval(function() {
+      $.get("{% url 'ajax_update' personp personp2 %}",function(json) {
+        //console.log(json);
+        //console.log("hello");
+        var result = document.getElementsByClassName("posts")[0];
+        result.innerHTML = ""; 
+        for(var i=0; i<json.dbba.length; i++)
+        {
+            if(json.dbba[i].person_head == '{{personp}}')
+            {
+                result.innerHTML+="<h4>"+json.dbba[i].body+"<h4>"+"<hr>";
+            }
+            else
+            {
+                result.innerHTML+="<h4 style='text-align: right;'>"+json.dbba[i].body+"<h4>"+"<hr>";
+            }
+            
+        }
+        /*var result = document.getElementsByClassName("posts2")[0];
+        result.innerHTML = ""; 
+        for(var i=0; i<json.dbba2.length; i++)
+        {
+            result.innerHTML+="<h4>"+json.dbba2[i].body+"<h4>"+"<hr>";
+        }*/
+        //if (data == 0) data = '';
+        //$(".posts").html(data);
+      });
+    }, 1000 * 10);
+</script>

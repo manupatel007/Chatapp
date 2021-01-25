@@ -9,12 +9,17 @@ from django.db.models import Q
 def chat_home(request):
     if request.method == 'POST':
         personp = request.POST.get('text')
-        personp2 = request.POST.get('text2')
-        dbba = ChatData.objects.filter( (Q(person_head=personp) & Q(person_tail=personp2)) | (Q(person_head=personp2) & Q(person_tail=personp))).order_by('date')
+        #personp2 = request.POST.get('text2')
+        #dbba = ChatData.objects.filter( (Q(person_head=personp) & Q(person_tail=personp2)) | (Q(person_head=personp2) & Q(person_tail=personp))).order_by('date')
+        dbba = ChatData.objects.all().order_by('date')
+        l=[]
+        for dbb in dbba:
+            if dbb.person_head not in l:
+                l.append(dbb.person_head)
         context = {
             'dbba':dbba,
             'personp':personp,
-            'personp2':personp2,
+            'human':l,
         }
         return render(request, 'chat.html', context)
     else:

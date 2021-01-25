@@ -57,6 +57,8 @@ def ajax_update(request, personp, personp2):
         a={}
         a['person_head']=dbb.person_head
         a['body']=dbb.body
+        a['date']=dbb.date.strftime("%B %d, %Y | %H:%M %p")
+
         responsedbba['dbba'].append(a)
     '''for dbb in dbba2:
         a={}

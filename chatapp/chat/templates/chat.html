@@ -295,8 +295,7 @@ img{ max-width:100%;}
             {% elif dbb.person_head == personp %}
             <div class="outgoing_msg">
               <div class="sent_msg">
-                <p>Test which is a new approach to have all
-                  solutions</p>
+                <p>{{dbb.body}}</p>
                 <span class="time_date"> 11:01 AM    |    June 9</span> </div>
             </div>
             {% endif %}
@@ -421,11 +420,11 @@ window.onload = setInterval(function() {
       var tmp = document.getElementById('mesgs').classList[0];
       var tmp2 = "{% url 'ajax_update' personp 1234 %}".replace(/1234/, tmp.toString());
       $.get(tmp2,function(json) {
-        console.log(json);
+        //console.log(json);
         //console.log("hello");
-        var result = document.getElementsByClassName(tmp)[0].firstChild;
-        console.log(result);
-        console.log("Happy")
+        var result = document.getElementsByClassName(tmp)[0].childNodes[1];
+        //console.log(result);
+        //console.log("Happy")
         result.innerHTML = ""; 
         for(var i=0; i<json.dbba.length; i++)
         {
@@ -434,18 +433,19 @@ window.onload = setInterval(function() {
                 result.innerHTML+="<div class='incoming_msg'>" + "<div class='incoming_msg_img'>" + "<img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'>" + "</div>" +
                               "<div class='received_msg'>" + 
                                 "<div class='received_withd_msg'>" +
-                                  "<p>" + json.dbba[i].body + "</p>" + "<span class='time_date'>" + "</span>" + "</div>" + "</div>" + 
+                                  "<p>" + json.dbba[i].body + "</p>" + json.dbba[i].date + "<span class='time_date'>" + "</span>" + "</div>" + "</div>" + 
                                   "</div>";
             }
             else
             {
                 result.innerHTML+= "<div class='outgoing_msg'>" +
               "<div class='sent_msg'>" + 
-                "<p>" + "Test which is a new approach to have all solutions" + "</p>" +
-                "<span class='time_date'>" + "</span>" + "</div>" + "</div>";
+                "<p>" + json.dbba[i].body + "</p>" +
+                "<span class='time_date'>" + "</span>" + json.dbba[i].date + "</div>" + "</div>";
             }
             
         }
+        result.scrollTop = result.scrollHeight; //to make div scrolled up
         /*var result = document.getElementsByClassName("posts2")[0];
         result.innerHTML = ""; 
         for(var i=0; i<json.dbba2.length; i++)

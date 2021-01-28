@@ -37,6 +37,7 @@ def create(request, personp, personp2):
         chtdt = ChatData(person_head=personp, person_tail=personp2, body=body)
         chtdt.save()
         ResponseData['body'] = body
+        ResponseData['date'] = chtdt.date.strftime("%B %d, %Y | %H:%M %p")
         return JsonResponse(ResponseData)
 
 @csrf_exempt

@@ -404,6 +404,12 @@ $(document).on('submit' ,function(e){
         },
         success:function(json){
             document.getElementById(tmp).parentNode.reset();
+            var result = document.getElementsByClassName(tmp)[0].childNodes[1];
+            result.innerHTML+= "<div class='outgoing_msg'>" +
+              "<div class='sent_msg'>" + 
+                "<p>" + json.body + "</p>" +
+                "<span class='time_date'>" + "</span>" + json.date + "</div>" + "</div>";
+            result.scrollTop = result.scrollHeight;
             /*$(".posts").prepend(
                         '<h4>' + json.body + '</h4>' + 
                         '<hr>'

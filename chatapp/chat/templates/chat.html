@@ -176,7 +176,7 @@ img{ max-width:100%;}
       }
       result = document.getElementById("c"+nam);
       result.innerHTML="";
-      var result1 = document.getElementsByClassName(nam)[0].childNodes[1];
+      var result1 = document.getElementById("msg"+nam);
       result1.scrollTop = result1.scrollHeight;
       if(document.getElementById("u"+nam))
       {
@@ -184,6 +184,64 @@ img{ max-width:100%;}
           document.getElementById("u"+nam).remove();
         }, 5000);
       }
+    }
+
+    function newFriend()
+    {
+      var tmp = document.getElementById('friend').value;
+      $.ajax({
+        type:'POST',
+        url:'{% url "check_username" %}',
+        data:{
+            username:tmp,
+            //csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success:function(json){
+          if(json.result=='no')  //here we are going opposite as we are using the function check_username
+          {
+            document.getElementById('friend').value="";
+            var result = document.getElementsByClassName('inbox_chat')[0];
+            result.innerHTML+= "<div class='chat_list' onclick=myFunction('"+ tmp + "')>" +
+              "<div class='chat_people'>" +
+                "<div class='chat_img'> <img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'> </div>" +
+                "<div class='chat_ib'>" +
+                  "<h5>" + tmp + "<span class='chat_date'>Dec 25</span></h5>" +
+                  "<p>Some text</p>" +
+                  "<span id='c" + tmp + "'></span>" +
+                "</div>" +
+              "</div>" +
+            "</div>";
+
+            var result1 = document.getElementById("kj");
+            var htmlstr = "";
+            htmlstr+="<div class='hiddenv "+ tmp +"'>" + 
+              "<div class='msg_history' id='msg"+ tmp +"'>";
+            htmlstr+= "</div>" +
+            "<div class='type_msg'>" +
+              "<div class='input_msg_write'>" +
+                "<form method='POST'>"  +
+                  "<input type='hidden' name='csrfmiddlewaretoken' value='{{csrf_token}}''>" +
+                "<input type='text' id='"+ tmp +"' class='write_msg' placeholder='Type a message' />" +
+                "<button class='msg_send_btn' type='submit' value='submit'><i class='fa fa-paper-plane-o' aria-hidden='true'></i></button>" +
+                "</form>" +
+              "</div>" +
+            "</div>" +
+          "</div>";
+              
+            result1.innerHTML = htmlstr;
+
+          }
+          else
+          {
+            alert("No such user");
+          }
+        },
+        error : function(xhr,errmsg,err) {
+          //console.log("happy4");
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    }
+    });
     }
     </script>
 </head>
@@ -199,9 +257,9 @@ img{ max-width:100%;}
             </div>
             <div class="srch_bar">
               <div class="stylish-input-group">
-                <input type="text" class="search-bar"  placeholder="Search" >
+                <input type="text" id="friend" class="search-bar"  placeholder="Search" >
                 <span class="input-group-addon">
-                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                <button type="button" onclick="newFriend()"> <i class="fa fa-search" aria-hidden="true"></i> </button>
                 </span> </div>
             </div>
           </div>
@@ -293,7 +351,7 @@ img{ max-width:100%;}
         <div id="kj">
           {% for h in human %}
           <div class="{{h}} hiddenv">
-            <div class="msg_history">
+            <div class="msg_history" id="msg{{h}}">
               {% for dbb in dbba %}
               {% if dbb.person_head == h %}
               <div class="incoming_msg">
@@ -420,7 +478,7 @@ $(document).on('submit' ,function(e){
         success:function(json){
           //console.log("happy2");
             document.getElementById(tmp).parentNode.reset();
-            var result = document.getElementsByClassName(tmp)[0].childNodes[1];
+            var result = document.getElementById("msg"+tmp);
             //console.log(result);
             result.innerHTML+= "<div class='outgoing_msg'>" +
               "<div class='sent_msg'>" + 
@@ -455,7 +513,7 @@ window.onload = setInterval(function() {
         //var htmlstr = "";
         for(const property in json.saman) 
         {
-          var result = document.getElementsByClassName(property)[0].childNodes[1];
+          var result = document.getElementById("msg"+property);
           //console.log(result);
           var htmlstr = "";
           //console.log(tmp,property);
@@ -499,7 +557,7 @@ window.onload = setInterval(function() {
           }
           result.innerHTML += htmlstr;
         }
-        var result1 = document.getElementsByClassName(tmp)[0].childNodes[1];
+        var result1 = document.getElementById("msg"+tmp);
         result1.scrollTop = result1.scrollHeight; //to make div scrolled up
 
         //console.log(json.kitna_msg);

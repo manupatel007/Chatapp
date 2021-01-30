@@ -51,6 +51,8 @@ def create(request, personp, personp2):
         chtdt.save()
         ResponseData['body'] = body
         ResponseData['date'] = chtdt.date.strftime("%B %d, %Y | %H:%M %p")
+        if personp2 not in dict1:
+            dict1[personp2]=1
         #print("hi")
         return JsonResponse(ResponseData)
 
@@ -105,6 +107,7 @@ def ajax_update(request, personp, personp2):
             w[dbb.person_tail]=1
         elif dbb.person_tail!=personp:
             w[dbb.person_tail]+=1
+
     for x in w:
         responsedbba['kitna_msg'][x] = w[x]-dict1[x]
         dict1[x] = w[x]
@@ -126,3 +129,22 @@ def ajax_update(request, personp, personp2):
     #print(responsedbba)
     #print(dict1)
     return JsonResponse(responsedbba)
+
+@csrf_exempt
+def check_username(request):
+    dbba = ChatData.objects.all()
+    l=[]
+    for dbb in dbba:
+        if dbb.person_head not in l:
+            l.append(dbb.person_head)
+        if dbb.person_tail not in l:
+            l.append(dbb.person_tail)
+    data = request.POST.get('username')
+    #print(data, l)
+    if data not in l:
+        return JsonResponse({'result':'yes'})
+    else:
+        return JsonResponse({'result':'no'})
+
+def register(request):
+    return render(request,'register.html',{})

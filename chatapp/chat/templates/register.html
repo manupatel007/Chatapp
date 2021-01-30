@@ -1,0 +1,43 @@
+<h style="text-align: center;">Hey! just put your username to get started</h>
+
+<form method="POST" action="{% url 'chat_home' %}">
+    {% csrf_token %}
+    <input type="text" id="user" placeholder="Username" name="text">
+    <p id="info"></p>
+    <input type="submit" value="submit" id="mysubmit" disabled>
+</form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    var searchTimeout;
+    document.getElementById('user').onkeypress = function () {
+        if (searchTimeout != undefined) clearTimeout(searchTimeout);
+        document.getElementById("mysubmit").disabled = true; //since a new username is generated, we have to check again
+        searchTimeout = setTimeout(callServerScript, 2000);
+    };
+    function callServerScript() {
+        $.ajax({
+        type:'POST',
+        url:'{% url "check_username" %}',
+        data:{
+            username:$('#user').val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success:function(json){
+          if(json.result=='yes')
+          {
+            document.getElementById('info').innerHTML="Perfect !";
+            document.getElementById("mysubmit").disabled = false;
+          }
+          else
+          {
+            document.getElementById('info').innerHTML="This username is already taken";
+          }
+        },
+        error : function(xhr,errmsg,err) {
+          //console.log("happy4");
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    }
+    });
+    }
+</script>

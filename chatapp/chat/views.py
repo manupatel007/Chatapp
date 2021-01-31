@@ -109,6 +109,8 @@ def ajax_update(request, personp, personp2):
             w[dbb.person_tail]+=1
 
     for x in w:
+        if x not in dict1:
+            dict1[x]=0
         responsedbba['kitna_msg'][x] = w[x]-dict1[x]
         dict1[x] = w[x]
     #print("cnt:"+str(cnt))

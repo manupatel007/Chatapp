@@ -157,9 +157,12 @@ img{ max-width:100%;}
 </style>
 <script type="text/javascript" src="https://cdn.usebootstrap.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdn.usebootstrap.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript">
+  var bahu = [];
     function myFunction(nam)
     {
+      bahu.push(nam);
       if(document.getElementById('mesgs'))
       {
         document.getElementById('mesgs').classList.add('hiddenv');
@@ -174,7 +177,7 @@ img{ max-width:100%;}
         document.getElementsByClassName(nam)[0].id = 'mesgs';
         document.getElementById('mesgs').classList.remove('hiddenv');
       }
-      result = document.getElementById("c"+nam);
+      result = document.getElementById("c"+nam); //no. of msg notification deletion
       result.innerHTML="";
       var result1 = document.getElementById("msg"+nam);
       result1.scrollTop = result1.scrollHeight;
@@ -243,6 +246,190 @@ img{ max-width:100%;}
     }
     });
     }
+
+
+
+    $(document).on('submit' ,function(e){
+    e.preventDefault();
+    //console.log("Kya mtlb h");
+    var tmp = document.getElementById('mesgs').classList[0]; //hiddenv will be removed
+    //console.log("happy");
+    $.ajax({
+        type:'POST',
+        url:'{% url "create" personp 1234 %}'.replace(/1234/, tmp.toString()),
+        data:{
+            body:$('#'+tmp).val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success:function(json){
+          //console.log("happy2");
+            document.getElementById(tmp).parentNode.reset();
+            var result = document.getElementById("msg"+tmp);
+            //console.log(result);
+            result.innerHTML+= "<div class='outgoing_msg'>" +
+              "<div class='sent_msg'>" + 
+                "<p>" + json.body + "</p>" +
+                "<span class='time_date'>" + "</span>" + json.date + "</div>" + "</div>";
+            result.scrollTop = result.scrollHeight;
+            /*$(".posts").prepend(
+                        '<h4>' + json.body + '</h4>' + 
+                        '<hr>'
+            )*/
+            //console.log("success");
+        },
+        error : function(xhr,errmsg,err) {
+          //console.log("happy4");
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    }
+    });
+});
+
+window.onload = setInterval(function() {
+      var tmp = document.getElementById('mesgs').classList[0];
+      //var tmp2 = "{% url 'ajax_update' personp 1234 %}".replace(/1234/, tmp.toString());
+      //console.log("happy");
+      $.ajax({
+        type:'POST',
+        url:'{% url "ajax_update" personp 1234 %}'.replace(/1234/, tmp.toString()),
+        data:{
+            body: JSON.stringify(bahu),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            action: 'post'
+        },
+        success:function(json) {
+        //console.log(json);
+        bahu = [tmp]
+        for(const property in json.saman) 
+        {
+          //adding new person starts
+          if(document.getElementById("c"+property))
+          {
+            //do nothing
+          }
+          else
+          {
+            var knt = document.getElementsByClassName('inbox_chat')[0];
+            knt.innerHTML+= "<div class='chat_list' onclick=myFunction('"+ property + "')>" +
+              "<div class='chat_people'>" +
+                "<div class='chat_img'> <img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'> </div>" +
+                "<div class='chat_ib'>" +
+                  "<h5>" + property + "<span class='chat_date'>Dec 25</span></h5>" +
+                  "<p>Some text</p>" +
+                  "<span id='c" + property + "'></span>" +
+                "</div>" +
+              "</div>" +
+            "</div>";
+
+            var knt1 = document.getElementById("kj");
+            var htmlstring = "";
+            htmlstring+="<div class='hiddenv "+ property +"'>" + 
+              "<div class='msg_history' id='msg"+ property +"'>";
+            htmlstring+= "</div>" +
+            "<div class='type_msg'>" +
+              "<div class='input_msg_write'>" +
+                "<form method='POST'>"  +
+                  "<input type='hidden' name='csrfmiddlewaretoken' value='{{csrf_token}}''>" +
+                "<input type='text' id='"+ property +"' class='write_msg' placeholder='Type a message' />" +
+                "<button class='msg_send_btn' type='submit' value='submit'><i class='fa fa-paper-plane-o' aria-hidden='true'></i></button>" +
+                "</form>" +
+              "</div>" +
+            "</div>" +
+          "</div>";
+              
+            knt1.innerHTML += htmlstring;
+          }
+          //adding new person ends
+
+
+          var resultu = document.getElementById("msg"+property);
+          //console.log(result);
+          var htmlstr = "";
+          //console.log(tmp,property);
+          /*if(property==tmp)
+          {
+            //console.log("AAo saa");
+            htmlstr+="<div class='"+ property +"' id='mesgs'>" + 
+            "<div class='msg_history'>";
+          }
+          else
+          {
+            htmlstr+="<div class='hiddenv "+ property +"'>" + 
+              "<div class='msg_history'>";
+          }*/
+          var a=0;
+          if(parseInt(document.getElementById("c"+property).innerHTML)>=1)
+              {
+                a=parseInt(document.getElementById("c"+property).innerHTML);
+              }
+          else if(json.kitna_msg[property]>0 && property!=tmp)
+          {
+            htmlstr+="<p id='u"+ property +"'>Unread messages</p>";
+          }
+          // hmne "a" variable bnaya, ab vo update to niche wale function me hoga to isko yha add krne se sirf shi message hi show honge
+          for(var i=json.saman[property].length-json.kitna_msg[property]+a; i<json.saman[property].length; i++)
+          {
+              /*if(parseInt(document.getElementById("c"+property).innerHTML)>=1 || property==tmp)
+              {
+                a=1;
+              }
+              else
+              {
+                //htmlstr+="<p id='u"+ property +"'>Unread messages</p>";
+              }*/
+              if(json.saman[property][i]['person_head'] != '{{personp}}')
+              {
+                  htmlstr+="<div class='incoming_msg'>" + "<div class='incoming_msg_img'>" + "<img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'>" + "</div>" +
+                                "<div class='received_msg'>" + 
+                                  "<div class='received_withd_msg'>" +
+                                    "<p>" + json.saman[property][i]['body'] + "</p>" + json.saman[property][i]['date'] + "<span class='time_date'>" + "</span>" + "</div>" + "</div>" + 
+                                    "</div>";
+              }
+              else //the logged user is sending message
+              {
+                  htmlstr+= "<div class='outgoing_msg'>" +
+                "<div class='sent_msg'>" + 
+                  "<p>" + json.saman[property][i]['body'] + "</p>" +
+                  "<span class='time_date'>" + "</span>" + json.saman[property][i]['date'] + "</div>" + "</div>";
+              }
+              
+          }
+          resultu.innerHTML += htmlstr;
+        }
+        var result1 = document.getElementById("msg"+tmp);
+        result1.scrollTop = result1.scrollHeight; //to make div scrolled up
+
+        //console.log(json.kitna_msg);
+        for(const property in json.kitna_msg)
+        {
+          
+          if(json.kitna_msg[property]>0 && property!=tmp)
+          {
+            result = document.getElementById("c"+property);
+            //console.log("hey");
+            //console.log(result);
+            /*if(parseInt(result.innerHTML)>=1)
+            {
+              result.innerHTML = parseInt(result.innerHTML)+json.kitna_msg[property];
+            }
+            else
+            {
+              result.innerHTML=json.kitna_msg[property];
+            }*/
+            result.innerHTML=json.kitna_msg[property];
+      
+          }
+        }
+      }, 
+      error : function(xhr,errmsg,err) {
+          //console.log("happy4");
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+    }
+      });
+    }, 1000 * 10);
+
+
+
     </script>
 </head>
 <body>
@@ -322,162 +509,6 @@ img{ max-width:100%;}
       
     </div></div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-$(document).on('submit' ,function(e){
-    e.preventDefault();
-    //console.log("Kya mtlb h");
-    var tmp = document.getElementById('mesgs').classList[0]; //hiddenv will be removed
-    //console.log("happy");
-    $.ajax({
-        type:'POST',
-        url:'{% url "create" personp 1234 %}'.replace(/1234/, tmp.toString()),
-        data:{
-            body:$('#'+tmp).val(),
-            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-            action: 'post'
-        },
-        success:function(json){
-          //console.log("happy2");
-            document.getElementById(tmp).parentNode.reset();
-            var result = document.getElementById("msg"+tmp);
-            //console.log(result);
-            result.innerHTML+= "<div class='outgoing_msg'>" +
-              "<div class='sent_msg'>" + 
-                "<p>" + json.body + "</p>" +
-                "<span class='time_date'>" + "</span>" + json.date + "</div>" + "</div>";
-            result.scrollTop = result.scrollHeight;
-            /*$(".posts").prepend(
-                        '<h4>' + json.body + '</h4>' + 
-                        '<hr>'
-            )*/
-            //console.log("success");
-        },
-        error : function(xhr,errmsg,err) {
-          //console.log("happy4");
-        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-    }
-    });
-});
-
-window.onload = setInterval(function() {
-      var tmp = document.getElementById('mesgs').classList[0];
-      var tmp2 = "{% url 'ajax_update' personp 1234 %}".replace(/1234/, tmp.toString());
-      //console.log("happy");
-      $.get(tmp2,function(json) {
-        //console.log(json);
-        for(const property in json.saman) 
-        {
-          //adding new person starts
-          if(document.getElementById("c"+property))
-          {
-            //do nothing
-          }
-          else
-          {
-            var knt = document.getElementsByClassName('inbox_chat')[0];
-            knt.innerHTML+= "<div class='chat_list' onclick=myFunction('"+ property + "')>" +
-              "<div class='chat_people'>" +
-                "<div class='chat_img'> <img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'> </div>" +
-                "<div class='chat_ib'>" +
-                  "<h5>" + property + "<span class='chat_date'>Dec 25</span></h5>" +
-                  "<p>Some text</p>" +
-                  "<span id='c" + property + "'></span>" +
-                "</div>" +
-              "</div>" +
-            "</div>";
-
-            var knt1 = document.getElementById("kj");
-            var htmlstring = "";
-            htmlstring+="<div class='hiddenv "+ property +"'>" + 
-              "<div class='msg_history' id='msg"+ property +"'>";
-            htmlstring+= "</div>" +
-            "<div class='type_msg'>" +
-              "<div class='input_msg_write'>" +
-                "<form method='POST'>"  +
-                  "<input type='hidden' name='csrfmiddlewaretoken' value='{{csrf_token}}''>" +
-                "<input type='text' id='"+ property +"' class='write_msg' placeholder='Type a message' />" +
-                "<button class='msg_send_btn' type='submit' value='submit'><i class='fa fa-paper-plane-o' aria-hidden='true'></i></button>" +
-                "</form>" +
-              "</div>" +
-            "</div>" +
-          "</div>";
-              
-            knt1.innerHTML += htmlstring;
-          }
-          //adding new person ends
-
-
-          var resultu = document.getElementById("msg"+property);
-          //console.log(result);
-          var htmlstr = "";
-          //console.log(tmp,property);
-          /*if(property==tmp)
-          {
-            //console.log("AAo saa");
-            htmlstr+="<div class='"+ property +"' id='mesgs'>" + 
-            "<div class='msg_history'>";
-          }
-          else
-          {
-            htmlstr+="<div class='hiddenv "+ property +"'>" + 
-              "<div class='msg_history'>";
-          }*/
-          for(var i=json.saman[property].length-json.kitna_msg[property]; i<json.saman[property].length; i++)
-          {
-              if(parseInt(document.getElementById("c"+property).innerHTML)>=1 || property==tmp)
-              {
-                a=1;
-              }
-              else
-              {
-                htmlstr+="<p id='u"+ property +"'>Unread messages</p>";
-              }
-              if(json.saman[property][i]['person_head'] != '{{personp}}')
-              {
-                  htmlstr+="<div class='incoming_msg'>" + "<div class='incoming_msg_img'>" + "<img src='https://ptetutorials.com/images/user-profile.png' alt='sunil'>" + "</div>" +
-                                "<div class='received_msg'>" + 
-                                  "<div class='received_withd_msg'>" +
-                                    "<p>" + json.saman[property][i]['body'] + "</p>" + json.saman[property][i]['date'] + "<span class='time_date'>" + "</span>" + "</div>" + "</div>" + 
-                                    "</div>";
-              }
-              else //the logged user is sending message
-              {
-                  /*htmlstr+= "<div class='outgoing_msg'>" +
-                "<div class='sent_msg'>" + 
-                  "<p>" + json.saman[property][i]['body'] + "</p>" +
-                  "<span class='time_date'>" + "</span>" + json.saman[property][i]['date'] + "</div>" + "</div>";*/
-              }
-              
-          }
-          resultu.innerHTML += htmlstr;
-        }
-        var result1 = document.getElementById("msg"+tmp);
-        result1.scrollTop = result1.scrollHeight; //to make div scrolled up
-
-        //console.log(json.kitna_msg);
-        for(const property in json.kitna_msg)
-        {
-          
-          if(json.kitna_msg[property]>0 && property!=tmp)
-          {
-            result = document.getElementById("c"+property);
-            //console.log("hey");
-            //console.log(result);
-            if(parseInt(result.innerHTML)>=1)
-            {
-              result.innerHTML = parseInt(result.innerHTML)+json.kitna_msg[property];
-            }
-            else
-            {
-              result.innerHTML=json.kitna_msg[property];
-            }
-      
-          }
-        }
-
-      });
-    }, 1000 * 10);
-</script>
+  
     </body>
     </html>

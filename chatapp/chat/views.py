@@ -171,6 +171,81 @@ def ajax_update(request, personp, personp2):
     #print(dict1)
     return JsonResponse(responsedbba)
 
+
+
+@csrf_exempt
+def first_update(request, personp):
+    #dbba = ChatData.objects.filter( (Q(person_head=personp) & Q(person_tail=personp2)) | (Q(person_head=personp2) & Q(person_tail=personp))).order_by('date')
+    #dbba = ChatData.objects.filter(person_head=personp, person_tail=personp2)
+    #dbba2 = ChatData.objects.filter(person_head=personp2, person_tail=personp)
+    #dbba.union(dbba,dbba2)
+
+    #ajax_update se ane wale data k saath khel shuru
+
+    #arr = request.POST.get('body')
+    #data = json.loads(arr)
+    #print(data)
+
+    #ajax_update se ane wale data k saath khel khtm
+
+    dbba_info = ChatRelation.objects.filter(person_head=personp).order_by('date')
+    dbba = ChatData.objects.filter(Q(person_head=personp) | Q(person_tail=personp)).order_by('date')
+    #print(dbba)
+    responsedbba = {}
+    responsedbba['saman'] = {}
+    responsedbba['kitna_msg'] = {}
+    l=[]
+    w={}    #wil be compared with dict1
+    cnt=0
+    for dbb in dbba:
+        #cnt+=1
+        if dbb.person_head not in responsedbba['saman'] and dbb.person_head!=personp:
+            responsedbba['saman'][dbb.person_head] = []
+            w[dbb.person_head]=1
+        elif dbb.person_head!=personp:
+            w[dbb.person_head]+=1
+
+        if dbb.person_tail not in responsedbba['saman'] and dbb.person_tail!=personp:
+            responsedbba['saman'][dbb.person_tail] = []
+            w[dbb.person_tail]=1
+        elif dbb.person_tail!=personp:
+            w[dbb.person_tail]+=1
+
+    '''for x in w:
+        if x not in dict1:
+            dict1[x]=0
+        responsedbba['kitna_msg'][x] = w[x]-dict1[x]
+        dict1[x] = w[x]'''
+
+    
+
+    #print("cnt:"+str(cnt))
+    #print(dict1,w)
+    #del responsedbba[personp]
+    #responsedbba['dbba'] = []
+    #responsedbba['dbba2'] = []
+    a={}
+    for dbb in dbba:
+        a={}
+        a['person_head']=dbb.person_head
+        a['body']=dbb.body
+        a['date']=dbb.date.strftime("%B %d, %Y | %H:%M %p")
+        if(dbb.person_head!=personp):
+            responsedbba['saman'][dbb.person_head].append(a)
+        else:
+            responsedbba['saman'][dbb.person_tail].append(a)
+
+    for dbb in dbba_info:
+        responsedbba['kitna_msg'][dbb.person_tail]= dbb.unread_msg_present
+        dbb.unread_msg_previous = dbb.unread_msg_present+0
+        dbb.save()
+        #responsedbba['kitna_msg'][dbb.person_tail]=
+    #print(responsedbba)
+    #print(dict1)
+    return JsonResponse(responsedbba)
+
+
+
 @csrf_exempt
 def check_username(request):
     dbba = ChatData.objects.all()

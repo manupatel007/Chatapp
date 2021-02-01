@@ -8,4 +8,5 @@ urlpatterns = [
     path('ajax_update/<personp>/<personp2>/', views.ajax_update, name='ajax_update'),
     path('check_username/', views.check_username, name='check_username'),
     path('register/', views.register, name='register'),
+    path('first_update/<personp>', views.first_update, name='first_update'),
 ]

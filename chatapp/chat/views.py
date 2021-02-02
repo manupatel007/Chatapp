@@ -16,9 +16,13 @@ def chat_home(request):
     #dbba = ChatData.objects.filter( (Q(person_head=personp) & Q(person_tail=personp2)) | (Q(person_head=personp2) & Q(person_tail=personp))).order_by('date')
     dbba = ChatData.objects.filter(Q(person_head=personp) | Q(person_tail=personp)).order_by('date')
     if(len(dbba)==0):
-        chtdt = ChatData(person_head="Chatapp", person_tail=personp, body="Hey! " + personp + "Warm welcome to this chatapp...")
+        chtdt = ChatData(person_head="Chatapp", person_tail=personp, body="Hey! " + personp + " Warm welcome to this chatapp... To get started, simply ask your friends to register and ask their username. Then simply enter their username in search bar above and click on search icon. By this way you can add them to your contact list, and message them.")
         chtdt.save()
         dbba = ChatData.objects.filter(Q(person_head=personp) | Q(person_tail=personp)).order_by('date')
+        chtr = ChatRelation(person_head=personp, person_tail="Chatapp")
+        chtr.save()
+        chtr.unread_msg_present+=1
+        chtr.save()
     #dbba = ChatData.objects.all().order_by('date')
     l=[]
     for dbb in dbba:
